@@ -1,4 +1,4 @@
-# k8s-setup
+# k8s setup in ubuntu
 
 ```shell
 
