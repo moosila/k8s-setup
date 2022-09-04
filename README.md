@@ -40,6 +40,15 @@ sudo apt-get update # update apt package index
 sudo apt-get install -y kubelet kubeadm kubectl # install kubelet, kubeadm and kubectl
 sudo apt-mark hold kubelet kubeadm kubectl # ping the versions
 
+# configure cgroup driver (default systemd if not provided)
+
+# create the cluster
+sudo apt-get update
+sudo apt-get upgrade # to get the latest version of kubeadm
+sudo kubeadm init --pod-network-cidr=10.0.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock # use --ignore-preflight-errors=all to ignore known errors. I had to ignore [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
+
+
+
 
 
 ```
