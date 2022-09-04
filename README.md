@@ -47,6 +47,16 @@ sudo apt-get update
 sudo apt-get upgrade # to get the latest version of kubeadm
 sudo kubeadm init --pod-network-cidr=10.0.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock # use --ignore-preflight-errors=all to ignore known errors. I had to ignore [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
 
+# set the kubeconfig. root user can just export KUBECONFIG=/etc/kubernetes/admin.conf instead
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# deploy a pod network to the cluster
+# install calico using manifest file
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml -O
+kubectl apply -f calico.yaml
+
 
 
 
