@@ -18,5 +18,18 @@ sudo curl -L https://raw.githubusercontent.com/containerd/containerd/main/contai
 sudo systemctl daemon-reload
 sudo systemctl enable --now containerd
 
+# install container runtime (low-level), runc
+curl -L https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64 -O
+curl -L https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.sha256sum -O
+sha256sum -c runc.sha256sum  # it should return runc.amd64: OK
+sudo install -m 755 runc.amd64 /usr/local/sbin/runc
+
+# install CNI plugins
+curl -L https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz -O
+curl -L https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz.sha256 -O
+sha256sum -c cni-plugins-linux-amd64-v1.1.1.tgz.sha256 # this should return cni-plugins-linux-amd64-v1.1.1.tgz: OK
+sudo mkdir -p /opt/cni/bin
+sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
+
 
 ```
