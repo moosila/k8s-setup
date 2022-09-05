@@ -4,7 +4,7 @@
 
 # disable swap
 sudo swapon --show
-free -h
+sudo free -h
 sudo swapoff -a
 sudo nano /etc/fstab #delete line /swap.img       none    swap    sw      0       0
 sudo swapon --show # this should not have any output
@@ -31,34 +31,48 @@ sha256sum -c cni-plugins-linux-amd64-v1.1.1.tgz.sha256 # this should return cni-
 sudo mkdir -p /opt/cni/bin
 sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
 
+# systemd containerd config.toml
+
+
+
 # install kubeadm, kubelet and kubectl
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl # install prerequesites, https, ca-certs and curl
 sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg # download google gpgs for the packages
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list # add the Kubernetes apt repository
 sudo apt-get update # update apt package index
-sudo apt-get install -y kubelet kubeadm kubectl # install kubelet, kubeadm and kubectl
+sudo apt-get install -qy kubelet=1.23.10-00 kubectl=1.23.10-00 kubeadm=1.23.10-00
+# sudo apt-get install -y kubelet kubeadm kubectl # install kubelet, kubeadm and kubectl
 sudo apt-mark hold kubelet kubeadm kubectl # ping the versions
 
 # configure cgroup driver (default systemd if not provided)
 
 # create the cluster
 sudo apt-get update
-sudo apt-get upgrade # to get the latest version of kubeadm
+####>>>>> did not run this:::: sudo apt-get upgrade # to get the latest version of kubeadm
 sudo kubeadm init --pod-network-cidr=10.0.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock # use --ignore-preflight-errors=all to ignore known errors. I had to ignore [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
+
+############### >>>>>> latest::: sudo kubeadm init --pod-network-cidr=10.0.0.0/16
+
 
 # set the kubeconfig. root user can just export KUBECONFIG=/etc/kubernetes/admin.conf instead
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+kubectl get nodes # this should return the master node with NotReady status
+
 # deploy a pod network to the cluster
 # install calico using manifest file
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml -O
 kubectl apply -f calico.yaml
 
+# install pod network, calico
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml -O
+kubectl apply -f calico.yaml
 
+kubectl get nodes # this should return the master node with Ready status
 
-
+kubectl get pods -n kube-system # this shoukld return all ready list of pods, calico, coredns, etcd, apiserver, kube-controler-manager, kube-proxy and kube-scheduler 
 
 ```
