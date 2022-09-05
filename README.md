@@ -1,6 +1,10 @@
 # k8s setup in ubuntu (QEMU/KVM, kubeadm, containerd, runc, calico)
 
 ```shell
+# spec
+# host: Ubuntu 22.04.1 LTS
+# guest vms: Ubuntu 22.04.1 LTS
+# virtualizer: QEMU/KVM Virtual Machine Manager 4.0.0
 
 # disable swap
 sudo swapon --show
