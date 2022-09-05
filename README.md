@@ -32,7 +32,8 @@ sudo mkdir -p /opt/cni/bin
 sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
 
 # create containerd configuration file, config.toml
-containerd config default > /etc/containerd/config.toml # you might need to create the /etc/containerd folder structure
+sudo mkdir /etc/containerd
+sudo sh -c 'containerd config default > /etc/containerd/config.toml'
 
 # configure the systemd cgroup driver with runc
 sudo nano /etc/containerd/config.toml # update SystemdCgroup = true and save
