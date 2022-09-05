@@ -88,7 +88,11 @@ kubectl get nodes # this should return the master node with Ready status
 kubectl get pods -n kube-system # this should return all ready list of pods, calico, coredns, etcd, apiserver, kube-controler-manager, kube-proxy and kube-scheduler
 kubectl run nginx --image=nginx:latest # this should return pod/nginx created. It might not get scheduled as there could be a taint in the master node
 
-# prepare the worker node host, remove swap, disable swap, install container runtime, containerd, # install container runtime (low-level), runc, install CNI plugins, create containerd configuration file, config.toml, configure the systemd cgroup driver with runc, install kubeadm, kubelet and kubectl
+# once a Pod network has been installed, you can confirm that it is working by checking that the CoreDNS Pod is Running in the output of kubectl get pods --all-namespaces. And once the CoreDNS Pod is up and running, you can continue by joining your nodes.
+# if your network is not working or CoreDNS is not in the Running state, check out the troubleshooting guide for kubeadm.
+
+# prepare the worker node host
+# remove swap, disable swap, install container runtime, containerd, # install container runtime (low-level), runc, install CNI plugins, create containerd configuration file, config.toml, configure the systemd cgroup driver with runc, install kubeadm, kubelet and kubectl
 
 # add worker node (runt the saved command in the kubeadm init step)
 kubeadm join 192.168.122.222:6443 --token rvbpq2.grcp2d0d5do5m14l --discovery-token-ca-cert-hash sha256:ca0c5f3fa9d98b6d711f20388e1875d2ee69b4f3d404383617854cfd2c87ccda 
