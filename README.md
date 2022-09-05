@@ -40,7 +40,7 @@ sudo nano /etc/containerd/config.toml # update SystemdCgroup = true and save
 # [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
 #   ...
 #   [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
-#     SystemdCgroup = **true**
+#     SystemdCgroup = true
 sudo systemctl restart containerd # restart containerd
 
 # install kubeadm, kubelet and kubectl
