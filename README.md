@@ -1,4 +1,4 @@
-# k8s setup in ubuntu (QEMU/KVM, containerd, runc)
+# k8s setup in ubuntu (QEMU/KVM, kubeadm, containerd, runc, calico)
 
 ```shell
 
