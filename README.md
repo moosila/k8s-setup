@@ -56,10 +56,10 @@ sudo apt-mark hold kubelet kubeadm kubectl # ping the versions
 
 # create the cluster
 sudo kubeadm init --pod-network-cidr=10.0.0.0/16 # inspect the output for errors if any
-
-# alter the command arguments and/or use --ignore-preflight-errors=all and rerun the command to ignore **known** errors. 
-# had to ignore [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
 # provide --cri-socket=unix:///var/run/containerd/containerd.sock if there are multiple container runtimes
+# alter the command arguments and/or use --ignore-preflight-errors=... and rerun the command to ignore **known** errors. 
+# got two errors [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
+# ignored all of them, by issueing --ignore-preflight-errors=all
 
 # kubeadm init should return "Your Kubernetes control-plane has initialized successfully!"
 # note down the kubeadm join node command printed in the console. e.g. kubeadm join 192.168.122.222:6443 --token rvbpq2.grcp2d0d5do5m14l \
@@ -88,11 +88,12 @@ kubectl run nginx --image=nginx:latest # this should return pod/nginx created. I
 
 # add worker node (runt the saved command in the kubeadm init step)
 kubeadm join 192.168.122.222:6443 --token rvbpq2.grcp2d0d5do5m14l --discovery-token-ca-cert-hash sha256:ca0c5f3fa9d98b6d711f20388e1875d2ee69b4f3d404383617854cfd2c87ccda 
+# alter the command arguments and/or use --ignore-preflight-errors=... and rerun the command to ignore **known** errors. 
+# got two errors [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
+# ignored all of them, by issueing --ignore-preflight-errors=all
+# kubeadm join command should return "This node has joined the cluster:..."
 
-
-
-
-
+# Run 'kubectl get nodes' on the control-plane to see this node join the cluster
 
 
 ```
