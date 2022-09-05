@@ -98,6 +98,7 @@ kubeadm join 192.168.122.222:6443 --token rvbpq2.grcp2d0d5do5m14l --discovery-to
 # kubeadm join command should return "This node has joined the cluster:..."
 
 # Run 'kubectl get nodes' on the control-plane to see this node join the cluster
-
-
 ```
+
+# troubleshooting
+https://www.thegeekdiary.com/troubleshooting-kubectl-error-the-connection-to-the-server-x-x-x-x6443-was-refused-did-you-specify-the-right-host-or-port/
