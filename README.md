@@ -31,9 +31,16 @@ sha256sum -c cni-plugins-linux-amd64-v1.1.1.tgz.sha256 # this should return cni-
 sudo mkdir -p /opt/cni/bin
 sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
 
-# systemd containerd config.toml
+# create containerd configuration file, config.toml
+containerd config default > /etc/containerd/config.toml # you might need to create the /etc/containerd folder structure
 
-
+# configure the systemd cgroup driver with runc
+sudo nano /etc/containerd/config.toml # update SystemdCgroup = true and save
+# [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+#   ...
+#   [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+#     SystemdCgroup = **true**
+sudo systemctl restart containerd # restart containerd
 
 # install kubeadm, kubelet and kubectl
 sudo apt-get update
@@ -41,38 +48,50 @@ sudo apt-get install -y apt-transport-https ca-certificates curl # install prere
 sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg # download google gpgs for the packages
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list # add the Kubernetes apt repository
 sudo apt-get update # update apt package index
-sudo apt-get install -qy kubelet=1.23.10-00 kubectl=1.23.10-00 kubeadm=1.23.10-00
-# sudo apt-get install -y kubelet kubeadm kubectl # install kubelet, kubeadm and kubectl
+sudo apt-get install -y kubelet=1.23.10-00 kubectl=1.23.10-00 kubeadm=1.23.10-00 # install kubelet, kubeadm and kubectl. set =version when need to install specific version
 sudo apt-mark hold kubelet kubeadm kubectl # ping the versions
 
-# configure cgroup driver (default systemd if not provided)
+# ???? haven't we configured in previous step? configure cgroup driver (default systemd if not provided)
 
 # create the cluster
-sudo apt-get update
-####>>>>> did not run this:::: sudo apt-get upgrade # to get the latest version of kubeadm
-sudo kubeadm init --pod-network-cidr=10.0.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock # use --ignore-preflight-errors=all to ignore known errors. I had to ignore [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
+sudo kubeadm init --pod-network-cidr=10.0.0.0/16 # inspect the output for errors if any
 
-############### >>>>>> latest::: sudo kubeadm init --pod-network-cidr=10.0.0.0/16
+# alter the command arguments and/or use --ignore-preflight-errors=all and rerun the command to ignore **known** errors. 
+# had to ignore [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables does not exist and [ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
+# provide --cri-socket=unix:///var/run/containerd/containerd.sock if there are multiple container runtimes
 
+# kubeadm init should return "Your Kubernetes control-plane has initialized successfully!"
+# note down the kubeadm join node command printed in the console. e.g. kubeadm join 192.168.122.222:6443 --token rvbpq2.grcp2d0d5do5m14l \
+	--discovery-token-ca-cert-hash sha256:ca0c5f3fa9d98b6d711f20388e1875d2ee69b4f3d404383617854cfd2c87ccda 
 
-# set the kubeconfig. root user can just export KUBECONFIG=/etc/kubernetes/admin.conf instead
+# set the kubeconfig
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# root user can just export KUBECONFIG=/etc/kubernetes/admin.conf instead
 
+# test the cluster (master node/control plain)
 kubectl get nodes # this should return the master node with NotReady status
 
 # deploy a pod network to the cluster
 # install calico using manifest file
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml -O
-kubectl apply -f calico.yaml
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml -O # download the calico manifest
+kubectl apply -f calico.yaml # install calico
 
-# install pod network, calico
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml -O
-kubectl apply -f calico.yaml
-
+# test the cluster (master node/control plain)
 kubectl get nodes # this should return the master node with Ready status
+kubectl get pods -n kube-system # this should return all ready list of pods, calico, coredns, etcd, apiserver, kube-controler-manager, kube-proxy and kube-scheduler
+kubectl run nginx --image=nginx:latest # this should return pod/nginx created. It might not get scheduled as there could be a taint in the master node
 
-kubectl get pods -n kube-system # this shoukld return all ready list of pods, calico, coredns, etcd, apiserver, kube-controler-manager, kube-proxy and kube-scheduler 
+# prepare the worker node host, remove swap, disable swap, install container runtime, containerd, # install container runtime (low-level), runc, install CNI plugins, create containerd configuration file, config.toml, configure the systemd cgroup driver with runc, install kubeadm, kubelet and kubectl
+
+# add worker node (runt the saved command in the kubeadm init step)
+kubeadm join 192.168.122.222:6443 --token rvbpq2.grcp2d0d5do5m14l --discovery-token-ca-cert-hash sha256:ca0c5f3fa9d98b6d711f20388e1875d2ee69b4f3d404383617854cfd2c87ccda 
+
+
+
+
+
+
 
 ```
