@@ -1,4 +1,4 @@
-# k8s setup in ubuntu (QEMU/KVM, kubeadm, containerd, runc, calico)
+# Install multi node kubernetes cluster in ubuntu vms (QEMU/KVM, kubeadm, containerd, runc, calico)
 
 ```shell
 # spec
